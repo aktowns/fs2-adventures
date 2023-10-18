@@ -1,36 +1,34 @@
-# monix-adventures
+# fs2-adventures
 In general you should complete the exercises in the master branch.
 There is a solution branch with  ... guess what...
 
 The exercises below are designed to be followed in order.
 
-Please note these exercises are using Monix 3.1.0.  Please refer to the docs at
-https://monix.io/docs/3x/eval/task.html
+Please note these exercises are using cats effect (IO) and FS2 3.9.2.  Please refer to the docs at
+https://fs2.io/#/guide
 
-## Adventure 1: Aysnchrony with Monix Task
+## Adventure 1: Asynchrony with IO
 The aim is:
 
-1. Gain practice/confidence in working with Monix Task.
+1. Gain practice/confidence in working with IO.
 
-Complete the exercises in: adventures.task.TaskAdventures
+Complete the exercises in: adventures.io.IOAdventures
 
-There are a series of tests that you need to make pass in TaskAdventuresSpec.
-Run them with `sbt "testOnly *.TaskAdventuresSpec"`.  Tests can also be run in the IDE.
+There are a series of tests that you need to make pass in IOAdventuresSpec.
+Run them with `sbt "testOnly *.IOAdventuresSpec"`.  Tests can also be run in the IDE.
 
 
-## Adventure 2: Aysnchrony with Monix Observable
+## Adventure 2: Asynchrony with FS2 Stream
 The aim is:
 
-1. Gain practice/confidence in working with Monix Observable.
+1. Gain practice/confidence in working with FS2 Stream.
 
-Where Task is for a single asynchronous action, an Observable represents an stream of
+Where IO is for a single asynchronous action, a `Stream` represents an stream of
 asynchronous actions.
 
-Complete the exercises in: adventures.task.ObservableAdventures
+Complete the exercises in: adventures.stream.StreamAdventures
 
-The docs for Observable are online https://monix.io/docs/3x/reactive/observable.html.  Note they are very thin and
-don't cover the majority of functions on Observable.  For those you are best exploring Observable in your IDE or
-browsing https://monix.io/api/3.0/monix/reactive/Observable.html.
+The docs for `Stream` are online https://fs2.io/#/guide?id=building-streams.  
 
-There are a series of tests that you need to make pass in ObservableAdventuresSpec.
-Run them with `sbt "testOnly *.ObservableAdventuresSpec"`.  Tests can also be run in the IDE.
+There are a series of tests that you need to make pass in StreamAdventuresSpec.
+Run them with `sbt "testOnly *.StreamAdventuresSpec"`.  Tests can also be run in the IDE.

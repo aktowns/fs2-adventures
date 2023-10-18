@@ -1,12 +1,14 @@
 ---
-title: Monix Adventures
+title: FS2 Adventures
 revealOptions:
     transition: 'fade'
     transitionSpeed: 'fast'
 theme: 'night'
 ---
 
-## Monix Adventures
+## FS2 Adventures
+
+A shameless port of monix-adventures by:
 
 Luke Stephenson
 https://github.com/lukestephenson/monix-adventures

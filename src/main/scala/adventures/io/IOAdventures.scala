@@ -1,4 +1,4 @@
-package adventures.task
+package adventures.io
 
 import cats.effect.IO
 
