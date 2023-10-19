@@ -1,20 +1,23 @@
 # fs2-adventures
+
+This is a port of the [monix-adventures](https://github.com/lukestephenson/monix-adventures) to FS2!
+
 In general you should complete the exercises in the master branch.
 There is a solution branch with  ... guess what...
 
 The exercises below are designed to be followed in order.
 
-Please note these exercises are using cats effect (IO) and FS2 3.9.2.  Please refer to the docs at
-https://fs2.io/#/guide
+Please note these exercises are using [cats effect](https://github.com/typelevel/cats-effect) and [fs2](https://fs2.io/)(3.9.2).  
+Please refer to the docs at https://fs2.io/#/guide
 
 ## Adventure 1: Asynchrony with IO
 The aim is:
 
 1. Gain practice/confidence in working with IO.
 
-Complete the exercises in: adventures.io.IOAdventures
+Complete the exercises in: `adventures.io.IOAdventures`
 
-There are a series of tests that you need to make pass in IOAdventuresSpec.
+There are a series of tests that you need to make pass in `IOAdventuresSpec`.
 Run them with `sbt "testOnly *.IOAdventuresSpec"`.  Tests can also be run in the IDE.
 
 

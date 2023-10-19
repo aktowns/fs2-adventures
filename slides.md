@@ -24,7 +24,7 @@ https://github.com/lukestephenson/monix-adventures
 
 ### First steps
 
-https://github.com/lukestephenson/monix-adventures
+https://github.com/aktowns/fs2-adventures
 
 - Star the project!
 - Install sbt - `brew install sbt`
@@ -64,8 +64,7 @@ val result: IO[User] = loadUserFromDb()
 ```scala
 val result: IO[User] = loadUserFromDb()
 
-IO.sleep(1.second) <<
-result.delayExecution(1.second)
+IO.sleep(1.second) <* result
 ```
 - Just data
 - Control of side effect execution
@@ -93,7 +92,7 @@ structure which doesn't model / represent asynchronous behaviour.
 ### Multiple asynchronous values
 
 ```scala
-val result: Observable[String] = readLinesFromAPI()
+val result: Stream[String] = readLinesFromAPI()
 ```
 
 Note:
@@ -103,6 +102,6 @@ Asynchrony is a first class citizen
 
 ### Start coding
 
-https://github.com/lukestephenson/monix-adventures
+https://github.com/aktowns/fs2-adventures
 
 Ask for help
