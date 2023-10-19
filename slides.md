@@ -51,9 +51,10 @@ val result: F[User] = loadUserFromDb()
 ```scala
 val result: Future[User] = loadUserFromDb()
 ```
+
 #### Lazy
 ```scala
-val result: Task[User] = loadUserFromDb()
+val result: IO[User] = loadUserFromDb()
 ```
 
 ---
@@ -61,7 +62,9 @@ val result: Task[User] = loadUserFromDb()
 ### Lazy asynchronous execution
 
 ```scala
-val result: Task[User] = loadUserFromDb()
+val result: IO[User] = loadUserFromDb()
+
+IO.sleep(1.second) <<
 result.delayExecution(1.second)
 ```
 - Just data

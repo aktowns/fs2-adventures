@@ -26,20 +26,20 @@ class StreamAdventuresTests extends CatsEffectSuite:
     obs.compile.toList.assertEquals(expected)
 
   test("load data in batches"):
-    val loads = ListBuffer[List[TargetRecord]]()
+    var loads: ListBuffer[List[TargetRecord]] = ListBuffer[List[TargetRecord]]()
 
     def esLoad(batch: Seq[TargetRecord]): IO[Unit] =
-      IO(loads.append(batch.toList))
+        IO(loads.append(batch.toList)).void
 
     val source   = (1 to 12).map(i => TargetRecord(i.toString, i)).toList
     val obs      = StreamAdventures.load(Stream.emits(source), esLoad)
     val expected = source.grouped(5).toList
 
-    obs.compile.toList.assertEquals(List(5, 5, 2))
+    assertEquals(obs.compile.toList.unsafeRunSync(), List(5, 5, 2))
     assertEquals(loads.toList, expected)
 
   test("load data in batches and retry on failure"):
-    val loads = ListBuffer[List[TargetRecord]]()
+    var loads = ListBuffer[List[TargetRecord]]()
 
     var i = 0
 
@@ -56,7 +56,7 @@ class StreamAdventuresTests extends CatsEffectSuite:
     val obs      = StreamAdventures.loadWithRetry(Stream.emits(source), esLoad)
     val expected = source.grouped(5).toList
 
-    obs.compile.toList.assertEquals(List(5, 5, 2))
+    assertEquals(obs.compile.toList.unsafeRunSync(), List(5, 5, 2))
     assertEquals(loads.toList, expected)
 
   test("Consume a stream"):
@@ -81,7 +81,7 @@ class StreamAdventuresTests extends CatsEffectSuite:
 
   // Verifies the implementation doesn't go the whole way to the end of all pages before emitting data.
   test("handling a paginated feed / should emit data as it is read"):
-    val pages = Map(
+    val pages: Map[PageId, PaginatedResult] = Map(
       PageId.FirstPage -> PaginatedResult(List(SourceRecord("1", "1.1")), Some(PageId("2"))),
       PageId("2")      -> PaginatedResult(List(SourceRecord("2", "2.2")), Some(PageId("3"))),
       PageId("3")      -> PaginatedResult(List(SourceRecord("3", "3.3")), None)
@@ -90,11 +90,11 @@ class StreamAdventuresTests extends CatsEffectSuite:
     def readPage(pageId: PageId): IO[PaginatedResult] =
       IO.sleep(1.second).as(pages(pageId))
 
-    val obs = StreamAdventures.readFromPaginatedDatasource(readPage)
+    val obs: Stream[IO, SourceRecord] = StreamAdventures.readFromPaginatedDatasource(readPage)
 
     var dataEmitted: SourceRecord = null
 
-    obs.foreach(emitted => IO { dataEmitted = emitted }).compile.drain.unsafeToFuture() // ???
+    obs.foreach((emitted: SourceRecord) => IO { dataEmitted = emitted }).compile.drain.unsafeToFuture() // ???
 
     Thread.sleep(1500) // TODO: TestControl
 

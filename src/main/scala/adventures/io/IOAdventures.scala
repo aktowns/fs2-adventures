@@ -29,7 +29,7 @@ object IOAdventures:
   def alwaysFailingTask(): IO[Unit] =
     IO.raiseError(new RuntimeException("boom"))
 
-  /** 4. There is 1 remote service which will return you a task that provides the current temperature in celsius.
+  /** 4. There is 1 remote service which will return you an effect that provides the current temperature in celsius.
     */
   def getCurrentTempInF(currentTemp: () => IO[Int]): IO[Int] =
 //    def cToF(c: Int) = c * 9 / 5 + 32
@@ -65,8 +65,8 @@ object IOAdventures:
   def calculateStringComplexityInParallelAgain(strings: List[String], complexity: String => IO[Int]): IO[Int] =
     ???
 
-  /** 7. Write a function which given a Task, will reattempt that task after a specified delay for a maximum number of
-    * attempts if the supplied Task fails.
+  /** 7. Write a function which given a IO, will reattempt that effect after a specified delay for a maximum number of
+    * attempts if the supplied IO fails.
     */
   def retryOnFailure[T](t: IO[T], maxRetries: Int, delay: FiniteDuration): IO[T] =
     t.handleErrorWith { e =>

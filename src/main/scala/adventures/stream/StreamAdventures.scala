@@ -5,6 +5,8 @@ import cats.effect.IO
 import fs2.{Pure, Stream}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.*
+import adventures.io.IOAdventures
 
 /** If elements from a list can be operated on synchronously as a List[A], then the equivalent data structure where
   * those elements can be operated asynchronously could be represented as a Observable[A].
@@ -37,7 +39,7 @@ object StreamAdventures:
 
   /** Create an Stream which emits each element of the source list
     */
-  def listToStream(records: List[SourceRecord]): Stream[Pure, SourceRecord] = ???
+  def listToStream(records: List[SourceRecord]): Stream[Pure, SourceRecord] = Stream.emits(records)
 
   /** Transform all of the SourceRecords to TargetRecords. If the price cannot be converted to a double, then drop the
     * Source element.
@@ -45,7 +47,10 @@ object StreamAdventures:
     * @param sourceRecords
     * @return
     */
-  def transform(sourceRecords: Stream[IO, SourceRecord]): Stream[IO, TargetRecord] = ???
+  def transform(sourceRecords: Stream[IO, SourceRecord]): Stream[IO, TargetRecord] =
+    sourceRecords.collect:
+      case SourceRecord(id, price) if price.matches("^[0-9]+(\\.[0-9]+)?$") =>
+        TargetRecord(id, price.toDouble)
 
   /** Elastic search supports saving batches of 5 records. This is a remote async call so the result is represented by
     * `Task`.
@@ -54,7 +59,9 @@ object StreamAdventures:
     * loaded items.
     */
   def load(targetRecords: Stream[IO, TargetRecord], elasticSearchLoad: Seq[TargetRecord] => IO[Unit]): Stream[IO, Int] =
-    ???
+    targetRecords
+      .groupWithin(5, 1.second)
+      .evalMap{chunk => elasticSearchLoad(chunk.toList).as(chunk.size)}
 
   /** Elasticsearch supports saving batches of 5 records. This is a remote async call so the result is represented by
     * `IO`. Note that the elasticSearchLoad may fail (in practice this is pretty rare). Rather than the Observable
@@ -66,13 +73,13 @@ object StreamAdventures:
     targetRecords: Stream[IO, TargetRecord],
     elasticSearchLoad: Seq[TargetRecord] => IO[Unit]
   ): Stream[IO, Int] =
-    load(targetRecords, elasticSearchLoad)
+    load(targetRecords, records => IOAdventures.retryOnFailure(elasticSearchLoad(records), 10, 500.millis))
 
   /** Consume the Observable
     *
     * The final result should be the number of records which were saved to ElasticSearch.
     */
-  def execute(loadedStream: Stream[IO, Int]): IO[Int] = ???
+  def execute(loadedStream: Stream[IO, Int]): IO[Int] = loadedStream.compile.toList.map(_.sum)
 
   /** Create an Observable from which all records can be read.
     *
@@ -85,7 +92,15 @@ object StreamAdventures:
     *
     * Look at Stream.++ AND Stream.tailRecM OR Stream.flatMap
     */
-  def readFromPaginatedDatasource(readPage: PageId => IO[PaginatedResult]): Stream[IO, SourceRecord] = ???
+  def readFromPaginatedDatasource(readPage: PageId => IO[PaginatedResult]): Stream[IO, SourceRecord] =
+    Stream.unfoldLoopEval(PageId.FirstPage) { pageId =>
+      readPage(pageId).map { paginatedResult =>
+        paginatedResult.nextPage match
+          case Some(nextPageId) => (paginatedResult.results, Some(nextPageId))
+          case None             => (paginatedResult.results, None)
+      }
+    }.flatMap(Stream.emits)
+
 
   /** Lets say reading a page takes 1 second and loading a batch of records takes 1 second. If there are 20 pages (each
     * of one load batch in size), how long will it take to execute? Look for "Processing took XXms" in the logs. Try to
