@@ -7,13 +7,11 @@ import cats.effect.implicits.*
 
 import scala.concurrent.duration.*
 
-/** If a result 'A' is available synchronously, then that same result asynchronously could be represented as a 'Task[A]'
+/** If a result 'A' is available synchronously, then that same result asynchronously could be represented as a 'IO[A]'
   */
 object IOAdventures:
 
   /**   1. Create a IO which returns 43
-    *
-    * See https://monix.io/docs/2x/eval/task.html#simple-builders for ways to construct Tasks
     */
   def immediatelyExecutingTask(): IO[Int] =
     IO(43)
@@ -23,8 +21,6 @@ object IOAdventures:
     IO(logger("hello world"))
 
   /** 3. Create a IO which always fails.
-    *
-    * See https://monix.io/docs/2x/eval/task.html#taskraiseerror
     */
   def alwaysFailingTask(): IO[Unit] =
     IO.raiseError(new RuntimeException("boom"))
@@ -32,7 +28,7 @@ object IOAdventures:
   /** 4. There is 1 remote service which will return you an effect that provides the current temperature in celsius.
     */
   def getCurrentTempInF(currentTemp: () => IO[Int]): IO[Int] =
-//    def cToF(c: Int) = c * 9 / 5 + 32
+    // def cToF(c: Int) = c * 9 / 5 + 32
     currentTemp().map(c => c * 9 / 5 + 32)
 
   /** 5. There is 1 remote service which will return you a task that provides the current temperature in celsius. The
@@ -45,25 +41,18 @@ object IOAdventures:
   /** 6. Computing the complexity of a string is a very expensive op. Implement this function so that complexity of the
     * calculation will be done in parallel. Sum the returned results to provide the overall complexity for all Strings.
     * (try using operations from monix)
-    *
-    * Also, check out the spec for this to see how the Monix TestScheduler can be used to simulate the passage of time
-    * in tests.
     */
   def calculateStringComplexityInParallel(strings: List[String], complexity: String => IO[Int]): IO[Int] =
     strings.parTraverse(complexity).map(_.sum)
 
-  /** 6.b. As above, but try to implement the parallel processing using the monix Applicative instance for Task and the
+  /** 6.b. As above, but try to implement the parallel processing using the Applicative instance for IO and the
     * cats `sequence` function. (if you haven't heard of cats / sequence skip this - even if you have consider this as
     * optional).
-    *
-    * The following imports will help. import cats.implicits._ implicit def parTaskApplicative:
-    * Applicative[eval.Task.Par] = Task.catsParallel.applicative
-    *
-    * Note that you will also need to convert from Task to Task.Par for the cats sequence operator to execute the tasks
-    * in parallel.
     */
   def calculateStringComplexityInParallelAgain(strings: List[String], complexity: String => IO[Int]): IO[Int] =
-    ???
+    strings.map(complexity).parSequence.map(_.sum)
+    // NOTE: Uh why not just parTraverse above, is this needed? is there a different way the first one should be done
+    // and this one should be parTraverse??
 
   /** 7. Write a function which given a IO, will reattempt that effect after a specified delay for a maximum number of
     * attempts if the supplied IO fails.
